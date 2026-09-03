@@ -8,47 +8,95 @@
 <body>
 <jsp:include page="common/topbar.jsp" />
 
-<div class="container my-5">
-    <div class="card card-custom p-4 shadow-sm text-center">
-        <div class="mb-3">
+<div class="container my-4">
+    <!-- User Welcome Banner -->
+    <div class="card card-custom p-4 shadow-sm mb-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <c:choose>
+                    <c:when test="${not empty sessionScope.account.avatar}">
+                        <c:choose>
+                            <c:when test="${sessionScope.account.avatar.startsWith('http')}">
+                                <img src="${sessionScope.account.avatar}" alt="Avatar" class="rounded-circle shadow" style="width: 70px; height: 70px; object-fit: cover;">
+                            </c:when>
+                            <c:otherwise>
+                                <img src="${pageContext.request.contextPath}/image?fname=${sessionScope.account.avatar}" alt="Avatar" class="rounded-circle shadow" style="width: 70px; height: 70px; object-fit: cover;" onerror="this.src='https://ui-avatars.com/api/?name=${sessionScope.account.fullName}&background=0d6efd&color=fff&size=70'">
+                            </c:otherwise>
+                        </c:choose>
+                    </c:when>
+                    <c:otherwise>
+                        <img src="https://ui-avatars.com/api/?name=${sessionScope.account.fullName}&background=0d6efd&color=fff&size=70" alt="Avatar" class="rounded-circle shadow" style="width: 70px; height: 70px; object-fit: cover;">
+                    </c:otherwise>
+                </c:choose>
+                <div>
+                    <h4 class="text-primary fw-bold mb-1">Xin chào, ${sessionScope.account.fullName}!</h4>
+                    <p class="text-muted mb-0 small">Tài khoản: <b>@${sessionScope.account.userName}</b> | Email: <b>${sessionScope.account.email}</b></p>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="${pageContext.request.contextPath}/profile" class="btn btn-outline-primary btn-sm">
+                    <i class="fa fa-user-edit me-1"></i> Hồ sơ cá nhân
+                </a>
+                <c:if test="${sessionScope.account.roleid == 1}">
+                    <a href="${pageContext.request.contextPath}/admin/categories" class="btn btn-danger btn-sm">
+                        <i class="fa fa-cogs me-1"></i> Quản lý Category (Admin)
+                    </a>
+                </c:if>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách Danh mục / Category Sản Phẩm -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h3 class="fw-bold text-dark mb-0"><i class="fa fa-th-large text-primary me-2"></i> Danh Mục Sản Phẩm</h3>
+        <span class="badge bg-primary fs-6">${listCategory != null ? listCategory.size() : 0} danh mục</span>
+    </div>
+
+    <div class="row g-4">
+        <c:forEach items="${listCategory}" var="cate">
             <c:choose>
-                <c:when test="${not empty sessionScope.account.avatar}">
-                    <c:choose>
-                        <c:when test="${sessionScope.account.avatar.startsWith('http')}">
-                            <img src="${sessionScope.account.avatar}" alt="Avatar" class="rounded-circle shadow" style="width: 100px; height: 100px; object-fit: cover;">
-                        </c:when>
-                        <c:otherwise>
-                            <img src="${pageContext.request.contextPath}/image?fname=${sessionScope.account.avatar}" alt="Avatar" class="rounded-circle shadow" style="width: 100px; height: 100px; object-fit: cover;" onerror="this.src='https://ui-avatars.com/api/?name=${sessionScope.account.fullName}&background=0d6efd&color=fff&size=100'">
-                        </c:otherwise>
-                    </c:choose>
+                <c:when test="${not empty cate.images && (cate.images.startsWith('http://') || cate.images.startsWith('https://'))}">
+                    <c:set var="cateImg" value="${cate.images}" />
                 </c:when>
                 <c:otherwise>
-                    <img src="https://ui-avatars.com/api/?name=${sessionScope.account.fullName}&background=0d6efd&color=fff&size=100" alt="Avatar" class="rounded-circle shadow" style="width: 100px; height: 100px; object-fit: cover;">
+                    <c:url value="/image" var="cateImg"><c:param name="fname" value="${cate.images}" /></c:url>
                 </c:otherwise>
             </c:choose>
-        </div>
 
-        <h2 class="text-primary fw-bold"><i class="fa fa-home"></i> Chào mừng bạn đến với Hệ Thống Web MVC!</h2>
-        <p class="lead text-muted">Mô hình kiến trúc 3 Tầng MVC với JPA / Hibernate & Quản lý giao diện SiteMesh</p>
-        
-        <div class="alert alert-light border p-3 mx-auto" style="max-width: 600px;">
-            <p class="mb-1">Tài khoản hiện tại: <b>${sessionScope.account.userName}</b> | Họ và tên: <b>${sessionScope.account.fullName}</b></p>
-            <p class="mb-0">Email: <b>${sessionScope.account.email}</b> | Số điện thoại: <b>${not empty sessionScope.account.phone ? sessionScope.account.phone : 'Chưa cập nhật'}</b></p>
-        </div>
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="card card-custom h-100 shadow-sm border-0 overflow-hidden">
+                    <div class="position-relative" style="height: 180px; background: #e9ecef;">
+                        <img src="${cateImg}" class="w-100 h-100 object-fit-cover" alt="${cate.categoryname}"
+                             onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/assets/img/category-placeholder.svg';">
+                        <c:choose>
+                            <c:when test="${cate.status == 1}">
+                                <span class="position-absolute top-0 end-0 badge bg-success m-2">Đang mở</span>
+                            </c:when>
+                            <c:otherwise>
+                                <span class="position-absolute top-0 end-0 badge bg-secondary m-2">Đã đóng</span>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                    <div class="card-body text-center d-flex flex-column justify-content-between">
+                        <h5 class="card-title fw-bold text-dark mb-2">${cate.categoryname}</h5>
+                        <p class="card-text text-muted small mb-3">Mã danh mục: #${cate.categoryid}</p>
+                        <a href="#" class="btn btn-outline-primary btn-sm w-100 mt-auto">
+                            <i class="fa fa-eye me-1"></i> Xem sản phẩm
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </c:forEach>
 
-        <div class="mt-4 d-flex justify-content-center gap-2 flex-wrap">
-            <a href="${pageContext.request.contextPath}/profile" class="btn btn-primary px-4">
-                <i class="fa fa-user-edit me-1"></i> Chỉnh sửa Hồ sơ cá nhân (Profile)
-            </a>
-            <c:if test="${sessionScope.account.roleid == 1}">
-                <a href="${pageContext.request.contextPath}/admin/categories" class="btn btn-success px-4">
-                    <i class="fa fa-folder-open me-1"></i> Quản lý Category (JPA)
-                </a>
-            </c:if>
-            <a href="${pageContext.request.contextPath}/logout" class="btn btn-outline-danger px-4">
-                <i class="fa fa-sign-out-alt me-1"></i> Đăng Xuất
-            </a>
-        </div>
+        <c:if test="${empty listCategory}">
+            <div class="col-12">
+                <div class="card p-5 text-center text-muted">
+                    <i class="fa fa-folder-open fa-3x mb-3 text-secondary"></i>
+                    <h5>Chưa có danh mục nào trong hệ thống.</h5>
+                    <p class="small">Admin có thể thêm danh mục tại trang Quản trị Category.</p>
+                </div>
+            </div>
+        </c:if>
     </div>
 </div>
 
