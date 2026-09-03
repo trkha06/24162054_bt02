@@ -1,51 +1,64 @@
-# Bài tập 02 - CRUD Category bằng JPA
+# Bài tập Web MVC - Quản trị Category & Hồ sơ User Profile (JPA, Multipart, SiteMesh)
 
-Project kế thừa chức năng đăng nhập, đăng ký, Cookie, Session và phân quyền của bài tập 01. Phần bài tập 02 bổ sung CRUD Category theo MVC/3-tier:
+**Sinh viên thực hiện**: Võ Văn Trường Kha  
+**MSSV**: 24162054  
+**Học phần**: Lập trình Web - HCMUTE  
 
-- Controller: `vn.iotstar.controller.admin.CategoryController`
-- Service: `vn.iotstar.services.ICategoryService` và `CategoryServiceImpl`
-- DAO JPA: `vn.iotstar.dao.ICategoryDao` và `CategoryDao`
-- Entity: `Category`, `Video`
-- View: `category-list.jsp`, `category-add.jsp`, `category-edit.jsp`
+---
 
-## Môi trường
+## 1. Tính năng của Hệ Thống
 
-- JDK 21
-- Tomcat 10.1 trở lên
-- MySQL 8
-- Maven 3.9 trở lên
+### 1.1. Chức năng User Profile (Hồ Sơ Cá Nhân)
+- **Cập nhật thông tin**: Họ và tên (`fullname`), Số điện thoại (`phone`), Ảnh đại diện (`avatar`/`images`).
+- **Tải ảnh đại diện (Multipart File Upload)**: Hỗ trợ upload ảnh JPG, PNG, GIF, WEBP từ máy tính lưu vào `Constant.DIR` (`24162054_uploads`) hoặc dán trực tiếp đường dẫn ảnh trực tuyến.
+- **Xem trước ảnh trực tiếp (Live Image Preview)**: Sử dụng JavaScript FileReader giúp xem trước ảnh ngay khi chọn tệp từ máy.
+- **Xử lý JPA / Hibernate**: Quản lý `User` entity qua `EntityManager` và `EntityTransaction`.
+- **Cập nhật Session tức thì**: Sau khi lưu thông tin, Session `account` được cập nhật giúp thanh Topbar và Header phản ánh ngay ảnh và tên mới.
 
-## Chuẩn bị dữ liệu
+### 1.2. Quản lý Giao diện bằng SiteMesh Decorator
+- Bố cục giao diện đồng bộ với SiteMesh:
+  - `decorators/web.jsp` / `views/decorators/web.jsp`: Decorator layout cho trang người dùng, trang chủ, hồ sơ cá nhân.
+  - `decorators/admin.jsp` / `views/decorators/admin.jsp`: Decorator layout cho khu vực quản trị Admin.
+  - Tích hợp `topbar.jsp`, `header.jsp`, `footer.jsp` đồng nhất.
 
-Mặc định ứng dụng kết nối database `servletjpa` trên `localhost:3306`. Có thể chạy file `src/main/resources/database.sql` để tạo schema và dữ liệu mẫu. Hibernate cũng được cấu hình `hbm2ddl.auto=update` để tự tạo/cập nhật bảng entity.
+### 1.3. CRUD Category bằng JPA
+- Quản lý danh mục theo mô hình MVC 3 tầng (DAO, Service, Controller, Entity JPA).
+- Thêm, xem, tìm kiếm theo tên, phân trang, sửa và xóa danh mục với Multipart Upload ảnh.
 
-Nếu máy dùng tài khoản MySQL khác, sửa `src/main/resources/META-INF/persistence.xml`, hoặc truyền ba Java system properties khi chạy Tomcat:
+---
 
-```text
--Dapp.jdbc.url=jdbc:mysql://localhost:3306/servletjpa
--Dapp.jdbc.user=root
--Dapp.jdbc.password=mat_khau_mysql
-```
+## 2. Kiến trúc & Cấu trúc Mã Nguồn
 
-Thư mục lưu ảnh upload mặc định là `24162054_uploads` trong thư mục người dùng. Có thể đổi bằng `-Dapp.upload.dir=duong_dan_mong_muon`.
+- **Entity JPA**: `vn.iotstar.entity.User`, `vn.iotstar.entity.Category`, `vn.iotstar.entity.Video`
+- **DAO JPA**: `vn.iotstar.dao.UserDao`, `vn.iotstar.dao.impl.UserDaoImpl`, `vn.iotstar.dao.ICategoryDao`, `vn.iotstar.dao.impl.CategoryDao`
+- **Service**: `vn.iotstar.service.UserService`, `vn.iotstar.service.impl.UserServiceImpl`, `vn.iotstar.services.ICategoryService`, `vn.iotstar.services.impl.CategoryServiceImpl`
+- **Controller**:
+  - `vn.iotstar.controller.auth.ProfileController` (`/profile`, `/user/profile`, `/my-profile`)
+  - `vn.iotstar.controller.admin.CategoryController` (`/admin/categories`, ...)
+  - `vn.iotstar.controller.admin.DownloadImageController` (`/image`)
+  - `vn.iotstar.controller.auth.LoginController`, `RegisterController`, `LogoutController`, `WaitingController`
+- **View & Decorators**:
+  - `views/profile.jsp`: Giao diện hồ sơ cá nhân và form cập nhật
+  - `views/decorators/web.jsp`, `views/decorators/admin.jsp`
+  - `WEB-INF/decorators.xml`, `WEB-INF/sitemesh3.xml`
 
-## Build và chạy
+---
 
-```text
+## 3. Môi trường & Hướng dẫn Chạy
+
+- **JDK**: 21
+- **Servlet Container**: Tomcat 10.1 trở lên (hỗ trợ Jakarta EE 10 / Servlet 6.0)
+- **Database**: MySQL 8.x (Database `servletjpa`)
+- **Build tool**: Maven 3.9 trở lên
+
+### Build project:
+```bash
 mvn clean package
 ```
 
-Deploy `target/24162054_bt02.war` lên Tomcat, sau đó mở:
+File WAR được sinh tại: `target/24162054_bt02.war`.
 
-```text
-http://localhost:8080/24162054_bt02/
-```
-
-Tài khoản demo quản trị:
-
-```text
-Username: admin
-Password: 123456
-```
-
-Sau khi đăng nhập, vào `/admin/categories` để thêm, xem, tìm kiếm, phân trang, sửa và xóa Category.
+### Tài khoản mẫu:
+- **Admin**: `admin` / `123456` (truy cập `/profile`, `/admin/categories`)
+- **Manager**: `manager` / `123456`
+- **User Sinh viên**: `24162054` / `123`

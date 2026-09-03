@@ -1,23 +1,25 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <jsp:include page="../common/header.jsp">
     <jsp:param name="title" value="Bảng Điều Khiển Quản Lý" />
 </jsp:include>
 <body>
 <jsp:include page="../common/topbar.jsp" />
 
-<div class="container mt-5">
-    <div class="card card-custom p-4">
-        <h2 class="text-warning"><i class="fa fa-briefcase"></i> DASHBOARD DÀNH CHO MANAGER (Role ID = 2)</h2>
-        <p class="lead">Xin chào Quản lý <b>${sessionScope.account.fullName}</b></p>
-        <p>Bạn có quyền theo dõi và giám sát các sản phẩm danh mục bán hàng.</p>
-        <div class="mt-4">
-            <span class="badge bg-warning text-dark fs-6 me-2"><i class="fa fa-user-clock"></i> Phiên đăng nhập Manager</span>
-            <a href="${pageContext.request.contextPath}/logout" class="btn btn-danger"><i class="fa fa-sign-out-alt"></i> Đăng xuất</a>
+<div class="container my-5">
+    <div class="card card-custom p-4 shadow-sm text-center">
+        <h2 class="text-warning fw-bold"><i class="fa fa-tasks"></i> Chào mừng bạn đến với Trang Quản Lý (Manager)!</h2>
+        <p class="lead text-muted">Xin chào Manager <b>${sessionScope.account.fullName}</b> (@${sessionScope.account.userName})</p>
+        <div class="mt-4 d-flex justify-content-center gap-2">
+            <a href="${pageContext.request.contextPath}/profile" class="btn btn-primary px-4"><i class="fa fa-user-edit"></i> Hồ Sơ Cá Nhân</a>
+            <a href="${pageContext.request.contextPath}/logout" class="btn btn-danger px-4"><i class="fa fa-sign-out-alt"></i> Đăng Xuất</a>
         </div>
     </div>
 </div>
+
+<jsp:include page="../common/footer.jsp" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import vn.iotstar.model.User;
+import vn.iotstar.entity.User;
 import vn.iotstar.util.Constant;
 
 @SuppressWarnings("serial")

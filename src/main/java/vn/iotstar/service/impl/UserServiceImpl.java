@@ -1,13 +1,15 @@
 package vn.iotstar.service.impl;
 
 import java.sql.Date;
+import java.util.List;
+
 import vn.iotstar.dao.UserDao;
 import vn.iotstar.dao.impl.UserDaoImpl;
-import vn.iotstar.model.User;
+import vn.iotstar.entity.User;
 import vn.iotstar.service.UserService;
 
 public class UserServiceImpl implements UserService {
-    private UserDao userDao = new UserDaoImpl();
+    private final UserDao userDao = new UserDaoImpl();
 
     @Override
     public User login(String username, String password) {
@@ -24,8 +26,35 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User findById(int id) {
+        return userDao.findById(id);
+    }
+
+    @Override
     public void insert(User user) {
         userDao.insert(user);
+    }
+
+    @Override
+    public void update(User user) {
+        userDao.update(user);
+    }
+
+    @Override
+    public boolean updateProfile(int id, String fullname, String phone, String avatar) {
+        User user = userDao.findById(id);
+        if (user == null) {
+            return false;
+        }
+        if (fullname != null && !fullname.isBlank()) {
+            user.setFullName(fullname.trim());
+        }
+        user.setPhone(phone == null || phone.isBlank() ? null : phone.trim());
+        if (avatar != null && !avatar.isBlank()) {
+            user.setAvatar(avatar.trim());
+        }
+        userDao.update(user);
+        return true;
     }
 
     @Override
@@ -52,5 +81,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean checkExistPhone(String phone) {
         return userDao.checkExistPhone(phone);
+    }
+
+    @Override
+    public boolean checkExistPhoneExceptUser(String phone, int userId) {
+        return userDao.checkExistPhoneExceptUser(phone, userId);
+    }
+
+    @Override
+    public List<User> findAll() {
+        return userDao.findAll();
     }
 }

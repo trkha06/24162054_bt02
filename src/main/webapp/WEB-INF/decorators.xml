@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<decorators defaultdir="/views/decorators">
+    <excludes>
+        <pattern>/image*</pattern>
+        <pattern>/assets/*</pattern>
+        <pattern>/api/*</pattern>
+    </excludes>
+
+    <decorator name="admin" page="admin.jsp">
+        <pattern>/admin/*</pattern>
+        <pattern>/admin</pattern>
+    </decorator>
+
+    <decorator name="web" page="web.jsp">
+        <pattern>/*</pattern>
+    </decorator>
+</decorators>
