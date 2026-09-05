@@ -1,259 +1,221 @@
 package vn.iotstar.dao.impl;
 
+import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.TypedQuery;
-import vn.iotstar.config.JpaConfig;
+import vn.iotstar.connection.DBConnection;
 import vn.iotstar.dao.UserDao;
-import vn.iotstar.entity.User;
+import vn.iotstar.model.User;
 
 public class UserDaoImpl implements UserDao {
 
     private static final List<User> MEMORY_USERS = new CopyOnWriteArrayList<>();
 
     static {
-        Date createdDate = Date.valueOf("2026-06-24");
-        MEMORY_USERS.add(new User(1, "admin@ute.edu.vn", "admin", "Quản Trị Viên", "123456", null, 1,
+        Date createdDate = Date.valueOf("2026-01-01");
+        MEMORY_USERS.add(new User(1, "admin@gmail.com", "admin", "Administrator", "123456", null, 1,
                 "0901234567", createdDate));
-        MEMORY_USERS.add(new User(2, "manager@ute.edu.vn", "manager", "Quản Lý Cửa Hàng", "123456", null, 2,
+        MEMORY_USERS.add(new User(2, "manager@gmail.com", "manager", "Store Manager", "123456", null, 2,
                 "0907654321", createdDate));
-        MEMORY_USERS.add(new User(3, "24162054@student.hcmute.edu.vn", "24162054", "Võ Văn Trường Kha", "123",
-                null, 1, "0908617108", createdDate));
-        MEMORY_USERS.add(new User(4, "trungnh@hcmute.edu.vn", "trungnh", "ThS. Nguyễn Hữu Trung", "123", null, 5,
+        MEMORY_USERS.add(new User(3, "user@gmail.com", "user", "Standard User", "123456", null, 5,
+                "0908889999", createdDate));
+        MEMORY_USERS.add(new User(4, "teacher@gmail.com", "teacher", "Nguyen Van A", "123456", null, 5,
                 "0900000000", createdDate));
     }
 
-    @Override
-    public User findById(int id) {
-        try {
-            EntityManager entityManager = JpaConfig.getEntityManager();
-            try {
-                return entityManager.find(User.class, id);
-            } finally {
-                entityManager.close();
-            }
-        } catch (Exception exception) {
-            System.err.println("Cannot find user by id from JPA: " + exception.getMessage());
-            return MEMORY_USERS.stream().filter(u -> u.getId() == id).findFirst().orElse(null);
-        }
-    }
+    private final DBConnection dbConnection = new DBConnection();
 
     @Override
     public User get(String username) {
-        return findByUsername(username);
-    }
-
-    @Override
-    public User findByUsername(String username) {
-        if (username == null || username.isBlank()) {
-            return null;
-        }
-        try {
-            EntityManager entityManager = JpaConfig.getEntityManager();
-            try {
-                String jpql = "SELECT u FROM User u WHERE LOWER(u.userName) = LOWER(:username)";
-                return entityManager.createQuery(jpql, User.class)
-                        .setParameter("username", username.trim())
-                        .setMaxResults(1)
-                        .getResultStream()
-                        .findFirst()
-                        .orElse(null);
-            } finally {
-                entityManager.close();
+        String sql = "SELECT id, username, password, fullname, email, phone, roleid, avatar, createddate FROM users WHERE username = ?";
+        try (Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, username);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return mapUser(resultSet);
+                }
             }
-        } catch (Exception exception) {
-            System.err.println("Cannot read user from JPA; using fallback: " + exception.getMessage());
-            return MEMORY_USERS.stream()
-                    .filter(u -> u.getUserName().equalsIgnoreCase(username.trim()))
-                    .findFirst()
-                    .orElse(null);
+        } catch (SQLException exception) {
+            System.err.println("Database query error: " + exception.getMessage());
         }
+        return MEMORY_USERS.stream()
+                .filter(user -> user.getUserName().equalsIgnoreCase(username))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
     public User findByEmail(String email) {
-        if (email == null || email.isBlank()) {
-            return null;
-        }
-        try {
-            EntityManager entityManager = JpaConfig.getEntityManager();
-            try {
-                String jpql = "SELECT u FROM User u WHERE LOWER(u.email) = LOWER(:email)";
-                return entityManager.createQuery(jpql, User.class)
-                        .setParameter("email", email.trim())
-                        .setMaxResults(1)
-                        .getResultStream()
-                        .findFirst()
-                        .orElse(null);
-            } finally {
-                entityManager.close();
+        String sql = "SELECT id, username, password, fullname, email, phone, roleid, avatar, createddate FROM users WHERE email = ?";
+        try (Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, email);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return mapUser(resultSet);
+                }
             }
-        } catch (Exception exception) {
-            return MEMORY_USERS.stream()
-                    .filter(u -> u.getEmail().equalsIgnoreCase(email.trim()))
-                    .findFirst()
-                    .orElse(null);
+        } catch (SQLException exception) {
+            System.err.println("Database query error: " + exception.getMessage());
         }
+        return MEMORY_USERS.stream()
+                .filter(user -> user.getEmail().equalsIgnoreCase(email))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public User findById(int id) {
+        String sql = "SELECT id, username, password, fullname, email, phone, roleid, avatar, createddate FROM users WHERE id = ?";
+        try (Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, id);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return mapUser(resultSet);
+                }
+            }
+        } catch (SQLException exception) {
+            System.err.println("Database query error: " + exception.getMessage());
+        }
+        return MEMORY_USERS.stream().filter(user -> user.getId() == id).findFirst().orElse(null);
     }
 
     @Override
     public void insert(User user) {
-        try {
-            EntityManager entityManager = JpaConfig.getEntityManager();
-            EntityTransaction transaction = entityManager.getTransaction();
-            try {
-                transaction.begin();
-                entityManager.persist(user);
-                transaction.commit();
-            } catch (Exception e) {
-                if (transaction.isActive()) {
-                    transaction.rollback();
-                }
-                throw e;
-            } finally {
-                entityManager.close();
-            }
-        } catch (Exception exception) {
-            System.err.println("Cannot insert user with JPA: " + exception.getMessage());
+        String sql = "INSERT INTO users(email, username, fullname, password, avatar, roleid, phone, createddate) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, user.getEmail());
+            statement.setString(2, user.getUserName());
+            statement.setString(3, user.getFullName());
+            statement.setString(4, user.getPassWord());
+            statement.setString(5, user.getAvatar());
+            statement.setInt(6, user.getRoleid());
+            statement.setString(7, user.getPhone());
+            statement.setDate(8, user.getCreatedDate() != null ? user.getCreatedDate() : new Date(System.currentTimeMillis()));
+            statement.executeUpdate();
+        } catch (SQLException exception) {
+            System.err.println("Database insert error: " + exception.getMessage());
         }
 
         if (MEMORY_USERS.stream().noneMatch(item -> item.getUserName().equalsIgnoreCase(user.getUserName()))) {
+            if (user.getId() == 0) {
+                user.setId(MEMORY_USERS.size() + 1);
+            }
             MEMORY_USERS.add(user);
         }
     }
 
     @Override
     public void update(User user) {
-        try {
-            EntityManager entityManager = JpaConfig.getEntityManager();
-            EntityTransaction transaction = entityManager.getTransaction();
-            try {
-                transaction.begin();
-                entityManager.merge(user);
-                transaction.commit();
-            } catch (Exception e) {
-                if (transaction.isActive()) {
-                    transaction.rollback();
-                }
-                throw e;
-            } finally {
-                entityManager.close();
-            }
-        } catch (Exception exception) {
-            System.err.println("Cannot update user with JPA: " + exception.getMessage());
+        String sql = "UPDATE users SET fullname = ?, phone = ?, avatar = ? WHERE id = ?";
+        try (Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, user.getFullName());
+            statement.setString(2, user.getPhone());
+            statement.setString(3, user.getAvatar());
+            statement.setInt(4, user.getId());
+            statement.executeUpdate();
+        } catch (SQLException exception) {
+            System.err.println("Database update error: " + exception.getMessage());
+        }
+        MEMORY_USERS.stream().filter(item -> item.getId() == user.getId()).findFirst().ifPresent(item -> {
+            item.setFullName(user.getFullName());
+            item.setPhone(user.getPhone());
+            item.setAvatar(user.getAvatar());
+        });
+    }
+
+    @Override
+    public void updatePassword(String usernameOrEmail, String newPassword) {
+        String sql = "UPDATE users SET password = ? WHERE username = ? OR email = ?";
+        try (Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, newPassword);
+            statement.setString(2, usernameOrEmail);
+            statement.setString(3, usernameOrEmail);
+            statement.executeUpdate();
+        } catch (SQLException exception) {
+            System.err.println("Database update password error: " + exception.getMessage());
         }
 
-        for (int i = 0; i < MEMORY_USERS.size(); i++) {
-            if (MEMORY_USERS.get(i).getId() == user.getId()
-                    || MEMORY_USERS.get(i).getUserName().equalsIgnoreCase(user.getUserName())) {
-                MEMORY_USERS.set(i, user);
-                break;
+        for (User user : MEMORY_USERS) {
+            if (user.getUserName().equalsIgnoreCase(usernameOrEmail) || user.getEmail().equalsIgnoreCase(usernameOrEmail)) {
+                user.setPassWord(newPassword);
             }
         }
     }
 
     @Override
     public boolean checkExistEmail(String email) {
-        if (email == null || email.isBlank()) {
-            return false;
-        }
-        try {
-            EntityManager entityManager = JpaConfig.getEntityManager();
-            try {
-                String jpql = "SELECT count(u) FROM User u WHERE LOWER(u.email) = LOWER(:email)";
-                Long count = entityManager.createQuery(jpql, Long.class)
-                        .setParameter("email", email.trim())
-                        .getSingleResult();
-                return count != null && count > 0;
-            } finally {
-                entityManager.close();
-            }
-        } catch (Exception exception) {
-            return MEMORY_USERS.stream().anyMatch(u -> u.getEmail().equalsIgnoreCase(email.trim()));
-        }
+        return existsBy("email", email);
     }
 
     @Override
     public boolean checkExistUsername(String username) {
-        if (username == null || username.isBlank()) {
-            return false;
-        }
-        try {
-            EntityManager entityManager = JpaConfig.getEntityManager();
-            try {
-                String jpql = "SELECT count(u) FROM User u WHERE LOWER(u.userName) = LOWER(:username)";
-                Long count = entityManager.createQuery(jpql, Long.class)
-                        .setParameter("username", username.trim())
-                        .getSingleResult();
-                return count != null && count > 0;
-            } finally {
-                entityManager.close();
-            }
-        } catch (Exception exception) {
-            return MEMORY_USERS.stream().anyMatch(u -> u.getUserName().equalsIgnoreCase(username.trim()));
-        }
+        return existsBy("username", username);
     }
 
     @Override
     public boolean checkExistPhone(String phone) {
-        if (phone == null || phone.isBlank()) {
-            return false;
-        }
-        try {
-            EntityManager entityManager = JpaConfig.getEntityManager();
-            try {
-                String jpql = "SELECT count(u) FROM User u WHERE u.phone = :phone";
-                Long count = entityManager.createQuery(jpql, Long.class)
-                        .setParameter("phone", phone.trim())
-                        .getSingleResult();
-                return count != null && count > 0;
-            } finally {
-                entityManager.close();
-            }
-        } catch (Exception exception) {
-            return MEMORY_USERS.stream().anyMatch(u -> phone.trim().equals(u.getPhone()));
-        }
+        return existsBy("phone", phone);
     }
 
     @Override
     public boolean checkExistPhoneExceptUser(String phone, int userId) {
-        if (phone == null || phone.isBlank()) {
-            return false;
-        }
-        try {
-            EntityManager entityManager = JpaConfig.getEntityManager();
-            try {
-                String jpql = "SELECT count(u) FROM User u WHERE u.phone = :phone AND u.id <> :userId";
-                Long count = entityManager.createQuery(jpql, Long.class)
-                        .setParameter("phone", phone.trim())
-                        .setParameter("userId", userId)
-                        .getSingleResult();
-                return count != null && count > 0;
-            } finally {
-                entityManager.close();
+        String sql = "SELECT 1 FROM users WHERE phone = ? AND id <> ? LIMIT 1";
+        try (Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, phone);
+            statement.setInt(2, userId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next();
             }
-        } catch (Exception exception) {
+        } catch (SQLException exception) {
             return MEMORY_USERS.stream()
-                    .anyMatch(u -> u.getId() != userId && phone.trim().equals(u.getPhone()));
+                    .anyMatch(user -> user.getId() != userId && phone.equalsIgnoreCase(user.getPhone()));
         }
     }
 
-    @Override
-    public List<User> findAll() {
-        try {
-            EntityManager entityManager = JpaConfig.getEntityManager();
-            try {
-                TypedQuery<User> query = entityManager.createNamedQuery("User.findAll", User.class);
-                return query.getResultList();
-            } finally {
-                entityManager.close();
-            }
-        } catch (Exception exception) {
-            return MEMORY_USERS;
+    private boolean existsBy(String column, String value) {
+        if (!List.of("email", "username", "phone").contains(column)) {
+            throw new IllegalArgumentException("Unsupported users column: " + column);
         }
+
+        String sql = "SELECT 1 FROM users WHERE " + column + " = ? LIMIT 1";
+        try (Connection connection = dbConnection.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, value);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
+        } catch (SQLException exception) {
+            return MEMORY_USERS.stream().anyMatch(user -> switch (column) {
+                case "email" -> user.getEmail().equalsIgnoreCase(value);
+                case "phone" -> user.getPhone().equalsIgnoreCase(value);
+                default -> user.getUserName().equalsIgnoreCase(value);
+            });
+        }
+    }
+
+    private User mapUser(ResultSet resultSet) throws SQLException {
+        return new User(
+                resultSet.getInt("id"),
+                resultSet.getString("email"),
+                resultSet.getString("username"),
+                resultSet.getString("fullname"),
+                resultSet.getString("password"),
+                resultSet.getString("avatar"),
+                resultSet.getInt("roleid"),
+                resultSet.getString("phone"),
+                resultSet.getDate("createddate"));
     }
 }

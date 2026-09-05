@@ -40,6 +40,9 @@
                         <a class="nav-link text-white" href="${pageContext.request.contextPath}/admin/category/add"><i class="fa fa-plus-circle"></i> Thêm Category</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link text-white" href="${pageContext.request.contextPath}/admin/products"><i class="fa fa-boxes-stacked"></i> Quản lý sản phẩm</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link text-white" href="${pageContext.request.contextPath}/profile"><i class="fa fa-user-circle"></i> Hồ sơ cá nhân</a>
                     </li>
                 </ul>

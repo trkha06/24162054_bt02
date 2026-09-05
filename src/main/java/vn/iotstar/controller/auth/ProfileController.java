@@ -16,7 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
-import vn.iotstar.entity.User;
+import vn.iotstar.model.User;
 import vn.iotstar.service.UserService;
 import vn.iotstar.service.impl.UserServiceImpl;
 import vn.iotstar.util.Constant;
@@ -52,7 +52,6 @@ public class ProfileController extends HttpServlet {
             user = sessionUser;
         }
 
-        // Refresh session
         session.setAttribute(Constant.SESSION_ACCOUNT, user);
         request.setAttribute("user", user);
 
@@ -116,7 +115,6 @@ public class ProfileController extends HttpServlet {
 
             userService.update(user);
 
-            // Update session with updated entity
             session.setAttribute(Constant.SESSION_ACCOUNT, user);
             session.setAttribute(Constant.SESSION_USERNAME, user.getUserName());
 
@@ -135,7 +133,6 @@ public class ProfileController extends HttpServlet {
 
     private String resolveImage(HttpServletRequest request, String currentImage)
             throws IOException, ServletException {
-        // Priority 1: Check multipart uploaded file
         Part imagePart = request.getPart("images1");
         if (imagePart == null || imagePart.getSize() == 0) {
             imagePart = request.getPart("avatar");
@@ -165,7 +162,6 @@ public class ProfileController extends HttpServlet {
             return storedName;
         }
 
-        // Priority 2: Check URL link
         String imageUrl = value(request.getParameter("images"));
         if (imageUrl.isEmpty()) {
             imageUrl = value(request.getParameter("avatarUrl"));
@@ -177,7 +173,6 @@ public class ProfileController extends HttpServlet {
             return imageUrl;
         }
 
-        // Fallback to current image
         return currentImage;
     }
 

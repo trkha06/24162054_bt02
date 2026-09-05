@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -18,6 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import vn.iotstar.entity.Category;
+import vn.iotstar.entity.Product;
 import vn.iotstar.services.ICategoryService;
 import vn.iotstar.services.IProductService;
 import vn.iotstar.services.impl.CategoryServiceImpl;
@@ -27,21 +29,21 @@ import vn.iotstar.util.Constant;
 @MultipartConfig(fileSizeThreshold = 2 * 1024 * 1024, maxFileSize = 10 * 1024 * 1024,
         maxRequestSize = 12 * 1024 * 1024)
 @WebServlet(urlPatterns = {
-        "/admin/categories",
-        "/admin/category/add",
-        "/admin/category/insert",
-        "/admin/category/edit",
-        "/admin/category/update",
-        "/admin/category/delete"
+        "/admin/products",
+        "/admin/product/add",
+        "/admin/product/insert",
+        "/admin/product/edit",
+        "/admin/product/update",
+        "/admin/product/delete"
 })
-public class CategoryController extends HttpServlet {
+public class AdminProductController extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-    private static final int PAGE_SIZE = 5;
+    private static final int PAGE_SIZE = 8;
     private static final Set<String> IMAGE_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif", "webp");
 
-    private final ICategoryService categoryService = new CategoryServiceImpl();
     private final IProductService productService = new ProductServiceImpl();
+    private final ICategoryService categoryService = new CategoryServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -50,11 +52,10 @@ public class CategoryController extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         switch (request.getServletPath()) {
-            case "/admin/categories" -> showList(request, response);
-            case "/admin/category/add" -> request.getRequestDispatcher(Constant.Path.CATEGORY_ADD)
-                    .forward(request, response);
-            case "/admin/category/edit" -> showEdit(request, response);
-            case "/admin/category/delete" -> delete(request, response);
+            case "/admin/products" -> showList(request, response);
+            case "/admin/product/add" -> showAdd(request, response);
+            case "/admin/product/edit" -> showEdit(request, response);
+            case "/admin/product/delete" -> delete(request, response);
             default -> response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
@@ -66,8 +67,8 @@ public class CategoryController extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         switch (request.getServletPath()) {
-            case "/admin/category/insert" -> insert(request, response);
-            case "/admin/category/update" -> update(request, response);
+            case "/admin/product/insert" -> insert(request, response);
+            case "/admin/product/update" -> update(request, response);
             default -> response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
         }
     }
@@ -76,85 +77,124 @@ public class CategoryController extends HttpServlet {
             throws ServletException, IOException {
         String keyword = value(request.getParameter("q"));
         int requestedPage = parsePositiveInt(request.getParameter("page"), 1);
-        List<Category> categories;
+        List<Product> products;
         int totalPages;
         int currentPage;
 
         if (keyword.isEmpty()) {
-            int totalItems = categoryService.count();
+            int totalItems = productService.count();
             totalPages = Math.max(1, (int) Math.ceil(totalItems / (double) PAGE_SIZE));
             currentPage = Math.min(requestedPage, totalPages);
-            categories = categoryService.findAll(currentPage - 1, PAGE_SIZE);
+            products = productService.findAll(currentPage - 1, PAGE_SIZE);
             request.setAttribute("totalItems", totalItems);
         } else {
-            categories = categoryService.searchByName(keyword);
+            products = productService.searchByName(keyword);
             totalPages = 1;
             currentPage = 1;
-            request.setAttribute("totalItems", categories.size());
+            request.setAttribute("totalItems", products.size());
         }
 
         moveFlashMessage(request, "success");
         moveFlashMessage(request, "alert");
-        request.setAttribute("listcate", categories);
+        request.setAttribute("listProducts", products);
         request.setAttribute("keyword", keyword);
         request.setAttribute("currentPage", currentPage);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("pageSize", PAGE_SIZE);
-        request.getRequestDispatcher(Constant.Path.CATEGORY_LIST).forward(request, response);
+        request.getRequestDispatcher(Constant.Path.ADMIN_PRODUCT_LIST).forward(request, response);
+    }
+
+    private void showAdd(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        List<Category> categories = categoryService.findAll();
+        request.setAttribute("categories", categories);
+        request.getRequestDispatcher(Constant.Path.ADMIN_PRODUCT_ADD).forward(request, response);
     }
 
     private void showEdit(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         int id = parsePositiveInt(request.getParameter("id"), -1);
-        Category category = id > 0 ? categoryService.findById(id) : null;
-        if (category == null) {
-            flash(request, "alert", "Không tìm thấy danh mục cần sửa.");
-            response.sendRedirect(request.getContextPath() + "/admin/categories");
+        Product product = id > 0 ? productService.findById(id) : null;
+        if (product == null) {
+            flash(request, "alert", "Không tìm thấy sản phẩm cần sửa.");
+            response.sendRedirect(request.getContextPath() + "/admin/products");
             return;
         }
-        request.setAttribute("cate", category);
-        request.getRequestDispatcher(Constant.Path.CATEGORY_EDIT).forward(request, response);
+        List<Category> categories = categoryService.findAll();
+        request.setAttribute("product", product);
+        request.setAttribute("categories", categories);
+        request.getRequestDispatcher(Constant.Path.ADMIN_PRODUCT_EDIT).forward(request, response);
     }
 
     private void insert(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        Category category = new Category();
-        category.setCategoryname(value(request.getParameter("categoryname")));
-        category.setStatus("1".equals(request.getParameter("status")) ? 1 : 0);
+        Product product = new Product();
+        product.setProductName(value(request.getParameter("productname")));
+        product.setPrice(parseDouble(request.getParameter("price"), 0.0));
+        product.setQuantity(parsePositiveInt(request.getParameter("quantity"), 0));
+        product.setDescription(value(request.getParameter("description")));
+        product.setStatus("1".equals(request.getParameter("status")) ? 1 : 0);
+        product.setCreateDate(new Date());
+
+        int categoryId = parsePositiveInt(request.getParameter("categoryid"), 0);
+        if (categoryId > 0) {
+            Category category = categoryService.findById(categoryId);
+            product.setCategory(category);
+        }
 
         try {
-            category.setImages(resolveImage(request, Constant.DEFAULT_IMAGE));
-            categoryService.insert(category);
-            flash(request, "success", "Đã thêm danh mục thành công.");
-            response.sendRedirect(request.getContextPath() + "/admin/categories");
+            if (product.getProductName().isEmpty()) {
+                throw new IllegalArgumentException("Tên sản phẩm không được để trống.");
+            }
+            product.setImages(resolveImage(request, Constant.DEFAULT_IMAGE));
+            productService.insert(product);
+            flash(request, "success", "Đã thêm sản phẩm mới thành công.");
+            response.sendRedirect(request.getContextPath() + "/admin/products");
         } catch (IllegalArgumentException exception) {
             request.setAttribute("alert", exception.getMessage());
-            request.setAttribute("formCategory", category);
-            request.getRequestDispatcher(Constant.Path.CATEGORY_ADD).forward(request, response);
+            request.setAttribute("product", product);
+            request.setAttribute("categories", categoryService.findAll());
+            request.getRequestDispatcher(Constant.Path.ADMIN_PRODUCT_ADD).forward(request, response);
         }
     }
 
     private void update(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int id = parsePositiveInt(request.getParameter("categoryid"), -1);
-        Category category = id > 0 ? categoryService.findById(id) : null;
-        if (category == null) {
-            flash(request, "alert", "Không tìm thấy danh mục cần cập nhật.");
-            response.sendRedirect(request.getContextPath() + "/admin/categories");
+        int id = parsePositiveInt(request.getParameter("productid"), -1);
+        Product product = id > 0 ? productService.findById(id) : null;
+        if (product == null) {
+            flash(request, "alert", "Không tìm thấy sản phẩm cần cập nhật.");
+            response.sendRedirect(request.getContextPath() + "/admin/products");
             return;
         }
 
-        category.setCategoryname(value(request.getParameter("categoryname")));
-        category.setStatus("1".equals(request.getParameter("status")) ? 1 : 0);
+        product.setProductName(value(request.getParameter("productname")));
+        product.setPrice(parseDouble(request.getParameter("price"), 0.0));
+        product.setQuantity(parsePositiveInt(request.getParameter("quantity"), 0));
+        product.setDescription(value(request.getParameter("description")));
+        product.setStatus("1".equals(request.getParameter("status")) ? 1 : 0);
+
+        int categoryId = parsePositiveInt(request.getParameter("categoryid"), 0);
+        if (categoryId > 0) {
+            Category category = categoryService.findById(categoryId);
+            product.setCategory(category);
+        } else {
+            product.setCategory(null);
+        }
+
         try {
-            category.setImages(resolveImage(request, category.getImages()));
-            categoryService.update(category);
-            flash(request, "success", "Đã cập nhật danh mục thành công.");
-            response.sendRedirect(request.getContextPath() + "/admin/categories");
+            if (product.getProductName().isEmpty()) {
+                throw new IllegalArgumentException("Tên sản phẩm không được để trống.");
+            }
+            product.setImages(resolveImage(request, product.getImages()));
+            productService.update(product);
+            flash(request, "success", "Đã cập nhật sản phẩm thành công.");
+            response.sendRedirect(request.getContextPath() + "/admin/products");
         } catch (IllegalArgumentException exception) {
             request.setAttribute("alert", exception.getMessage());
-            request.setAttribute("cate", category);
-            request.getRequestDispatcher(Constant.Path.CATEGORY_EDIT).forward(request, response);
+            request.setAttribute("product", product);
+            request.setAttribute("categories", categoryService.findAll());
+            request.getRequestDispatcher(Constant.Path.ADMIN_PRODUCT_EDIT).forward(request, response);
         }
     }
 
@@ -162,20 +202,15 @@ public class CategoryController extends HttpServlet {
         int id = parsePositiveInt(request.getParameter("id"), -1);
         try {
             if (id < 1) {
-                throw new IllegalArgumentException("Mã danh mục không hợp lệ.");
+                throw new IllegalArgumentException("Mã sản phẩm không hợp lệ.");
             }
-            int productCount = productService.countByCategoryId(id);
-            if (productCount > 0) {
-                throw new IllegalArgumentException("Danh mục đang có " + productCount
-                        + " sản phẩm. Hãy chuyển hoặc xóa các sản phẩm đó trước.");
-            }
-            categoryService.delete(id);
-            flash(request, "success", "Đã xóa danh mục thành công.");
+            productService.delete(id);
+            flash(request, "success", "Đã xóa sản phẩm thành công.");
         } catch (Exception exception) {
             flash(request, "alert", exception.getMessage() == null
-                    ? "Không thể xóa danh mục." : exception.getMessage());
+                    ? "Không thể xóa sản phẩm." : exception.getMessage());
         }
-        response.sendRedirect(request.getContextPath() + "/admin/categories");
+        response.sendRedirect(request.getContextPath() + "/admin/products");
     }
 
     private String resolveImage(HttpServletRequest request, String currentImage)
@@ -216,6 +251,14 @@ public class CategoryController extends HttpServlet {
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException exception) {
+            return fallback;
+        }
+    }
+
+    private double parseDouble(String value, double fallback) {
+        try {
+            return Double.parseDouble(value);
+        } catch (Exception exception) {
             return fallback;
         }
     }

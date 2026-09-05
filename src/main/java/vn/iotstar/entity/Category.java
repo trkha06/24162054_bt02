@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -42,6 +42,9 @@ public class Category implements Serializable {
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Video> videos = new ArrayList<>();
 
+    @OneToMany(mappedBy = "category")
+    private List<Product> products = new ArrayList<>();
+
     public Category() {
     }
 
@@ -67,6 +70,23 @@ public class Category implements Serializable {
         }
         video.setCategory(null);
         return video;
+    }
+
+    public Product addProduct(Product product) {
+        if (this.products == null) {
+            this.products = new ArrayList<>();
+        }
+        this.products.add(product);
+        product.setCategory(this);
+        return product;
+    }
+
+    public Product removeProduct(Product product) {
+        if (this.products != null) {
+            this.products.remove(product);
+        }
+        product.setCategory(null);
+        return product;
     }
 
     public int getCategoryid() {
@@ -115,5 +135,13 @@ public class Category implements Serializable {
 
     public void setVideos(List<Video> videos) {
         this.videos = videos;
+    }
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
     }
 }

@@ -11,10 +11,14 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import vn.iotstar.entity.User;
+import vn.iotstar.model.User;
 import vn.iotstar.util.Constant;
 
-@WebFilter(urlPatterns = { "/admin/*", "/manager/*", "/home" })
+@WebFilter(urlPatterns = {
+        "/admin/*", "/manager/*",
+        "/profile", "/user/profile", "/my-profile",
+        "/multiPartServlet", "/uploadFile"
+})
 public class AuthorizationFilter implements Filter {
 
     @Override
@@ -36,7 +40,7 @@ public class AuthorizationFilter implements Filter {
             resp.sendRedirect(req.getContextPath() + "/waiting");
             return;
         }
-        if (path.startsWith("/manager/") && account.getRoleid() != 2) {
+        if (path.startsWith("/manager/") && account.getRoleid() != 2 && account.getRoleid() != 1) {
             resp.sendRedirect(req.getContextPath() + "/waiting");
             return;
         }

@@ -34,7 +34,6 @@ public class DownloadImageController extends HttpServlet {
             return;
         }
 
-        // Check fallback in webapp assets
         Path assetPlaceholder = Path.of(getServletContext().getRealPath("/assets/img/category-placeholder.svg"));
         if (Files.isRegularFile(assetPlaceholder)) {
             response.setContentType("image/svg+xml");
@@ -43,7 +42,6 @@ public class DownloadImageController extends HttpServlet {
             return;
         }
 
-        // Return inline SVG fallback
         String svg = "<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'>"
                 + "<rect width='100%' height='100%' fill='#0d6efd'/>"
                 + "<text x='50%' y='52%' fill='#ffffff' font-family='sans-serif' font-size='48' font-weight='bold' text-anchor='middle' dominant-baseline='middle'>U</text>"

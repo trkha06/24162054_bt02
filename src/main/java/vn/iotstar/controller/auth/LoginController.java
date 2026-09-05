@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import vn.iotstar.entity.User;
+import vn.iotstar.model.User;
 import vn.iotstar.service.UserService;
 import vn.iotstar.service.impl.UserServiceImpl;
 import vn.iotstar.util.Constant;
@@ -16,7 +16,7 @@ import vn.iotstar.util.Constant;
 @SuppressWarnings("serial")
 @WebServlet(urlPatterns = {"/login"})
 public class LoginController extends HttpServlet {
-    private UserService userService = new UserServiceImpl();
+    private final UserService userService = new UserServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -42,9 +42,15 @@ public class LoginController extends HttpServlet {
                 }
             }
         }
-        if ("1".equals(req.getParameter("registered"))) {
+
+        if ("1".equals(req.getParameter("activated"))) {
+            req.setAttribute("success", "Tài khoản đã được kích hoạt thành công! Bạn có thể đăng nhập ngay bây giờ.");
+        } else if ("1".equals(req.getParameter("resetSuccess"))) {
+            req.setAttribute("success", "Mật khẩu đã được đặt lại thành công! Vui lòng đăng nhập với mật khẩu mới.");
+        } else if ("1".equals(req.getParameter("registered"))) {
             req.setAttribute("success", "Đăng ký thành công. Vui lòng đăng nhập.");
         }
+
         req.getRequestDispatcher(Constant.Path.LOGIN).forward(req, resp);
     }
 
@@ -58,29 +64,26 @@ public class LoginController extends HttpServlet {
         String remember = req.getParameter("remember");
         boolean isRememberMe = "on".equals(remember);
 
-        String alertMsg = "";
         if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
-            alertMsg = "Tài khoản hoặc mật khẩu không được rỗng";
-            req.setAttribute("alert", alertMsg);
+            req.setAttribute("alert", "Tài khoản hoặc mật khẩu không được rỗng");
             req.getRequestDispatcher(Constant.Path.LOGIN).forward(req, resp);
             return;
         }
 
-        User user = userService.login(username, password);
+        User user = userService.login(username.trim(), password);
         if (user != null) {
             HttpSession session = req.getSession(true);
             session.setAttribute(Constant.SESSION_ACCOUNT, user);
             session.setAttribute(Constant.SESSION_USERNAME, user.getUserName());
 
             if (isRememberMe) {
-                saveRememberMe(req, resp, username);
+                saveRememberMe(req, resp, user.getUserName());
             } else {
                 deleteRememberMe(req, resp);
             }
             resp.sendRedirect(req.getContextPath() + "/waiting");
         } else {
-            alertMsg = "Tài khoản hoặc mật khẩu không đúng!";
-            req.setAttribute("alert", alertMsg);
+            req.setAttribute("alert", "Tài khoản hoặc mật khẩu không đúng!");
             req.getRequestDispatcher(Constant.Path.LOGIN).forward(req, resp);
         }
     }

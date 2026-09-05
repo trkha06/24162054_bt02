@@ -10,7 +10,6 @@
 <jsp:include page="common/topbar.jsp" />
 
 <div class="container my-5">
-    <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb bg-white p-3 rounded-3 shadow-sm">
             <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/home"><i class="fa fa-home"></i> Trang chủ</a></li>
@@ -18,7 +17,6 @@
         </ol>
     </nav>
 
-    <!-- Thông báo Flash Alert -->
     <c:if test="${not empty alert}">
         <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
             <i class="fa fa-exclamation-triangle me-2"></i> ${alert}
@@ -33,7 +31,6 @@
     </c:if>
 
     <div class="row g-4">
-        <!-- Cột thông tin tổng quan User (Card trái) -->
         <div class="col-lg-4">
             <div class="card card-custom p-4 text-center shadow-sm">
                 <div class="position-relative d-inline-block mx-auto mb-3">
@@ -83,14 +80,6 @@
 
                 <div class="text-start small">
                     <div class="d-flex justify-content-between py-2 border-bottom">
-                        <span class="text-muted"><i class="fa fa-id-badge me-2 text-primary"></i> ID Tài khoản:</span>
-                        <span class="fw-bold">${user.id}</span>
-                    </div>
-                    <div class="d-flex justify-content-between py-2 border-bottom">
-                        <span class="text-muted"><i class="fa fa-envelope me-2 text-primary"></i> Email:</span>
-                        <span class="fw-semibold">${user.email}</span>
-                    </div>
-                    <div class="d-flex justify-content-between py-2 border-bottom">
                         <span class="text-muted"><i class="fa fa-phone me-2 text-primary"></i> Điện thoại:</span>
                         <span class="fw-semibold">${not empty user.phone ? user.phone : '<em class=\"text-muted\">Chưa cập nhật</em>'}</span>
                     </div>
@@ -113,7 +102,6 @@
             </div>
         </div>
 
-        <!-- Cột Form Chỉnh Sửa Thông Tin (Card phải) -->
         <div class="col-lg-8">
             <div class="card card-custom p-4 shadow-sm">
                 <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-4">
@@ -125,28 +113,20 @@
                 </div>
 
                 <form action="${pageContext.request.contextPath}/profile" method="post" enctype="multipart/form-data" novalidate>
-                    <!-- Username & Email (Readonly) -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold text-secondary"><i class="fa fa-user me-1"></i> Tên đăng nhập (Username)</label>
                             <input type="text" class="form-control bg-light" value="${user.userName}" readonly disabled>
                             <small class="text-muted">Tên đăng nhập không thể thay đổi.</small>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold text-secondary"><i class="fa fa-envelope me-1"></i> Địa chỉ Email</label>
-                            <input type="email" class="form-control bg-light" value="${user.email}" readonly disabled>
-                            <small class="text-muted">Email đã xác thực theo tài khoản.</small>
-                        </div>
                     </div>
 
-                    <!-- Full Name -->
                     <div class="mb-3">
                         <label for="fullname" class="form-label fw-bold"><i class="fa fa-id-card me-1 text-primary"></i> Họ và Tên <span class="text-danger">*</span></label>
                         <input type="text" id="fullname" name="fullname" class="form-control form-control-lg"
                                value="${user.fullName}" placeholder="Nhập họ và tên đầy đủ" required>
                     </div>
 
-                    <!-- Phone Number -->
                     <div class="mb-3">
                         <label for="phone" class="form-label fw-bold"><i class="fa fa-phone me-1 text-primary"></i> Số Điện Thoại</label>
                         <div class="input-group">
@@ -157,11 +137,9 @@
                         <small class="text-muted">Định dạng số điện thoại Việt Nam 10 chữ số.</small>
                     </div>
 
-                    <!-- Avatar / Images (Multipart Upload & URL) -->
                     <div class="card bg-light border-0 p-3 mb-4 rounded-3">
                         <h6 class="fw-bold text-dark mb-3"><i class="fa fa-image me-2 text-primary"></i> Cập Nhật Ảnh Đại Diện (Images)</h6>
 
-                        <!-- Tải tệp lên (Multipart) -->
                         <div class="mb-3">
                             <label for="images1" class="form-label fw-semibold">1. Tải ảnh từ máy tính (Multipart Upload):</label>
                             <input type="file" id="images1" name="images1" class="form-control"
@@ -169,7 +147,6 @@
                             <small class="text-muted">Hỗ trợ các định dạng: JPG, PNG, GIF, WEBP (tối đa 10MB).</small>
                         </div>
 
-                        <!-- Hoặc nhập link ảnh trực tuyến -->
                         <div class="mb-2">
                             <label for="images" class="form-label fw-semibold">2. Hoặc nhập liên kết ảnh trực tuyến (URL):</label>
                             <input type="url" id="images" name="images" class="form-control"
@@ -180,7 +157,6 @@
                         </div>
                     </div>
 
-                    <!-- Nút hành động -->
                     <div class="d-flex justify-content-between align-items-center pt-3 border-top">
                         <a href="${pageContext.request.contextPath}/home" class="btn btn-secondary px-4">
                             <i class="fa fa-arrow-left me-1"></i> Quay lại
@@ -197,7 +173,6 @@
 
 <jsp:include page="common/footer.jsp" />
 
-<!-- Script xem trước ảnh trực tiếp (Image Preview) -->
 <script>
     function previewFile(input) {
         if (input.files && input.files[0]) {
@@ -210,7 +185,6 @@
                 }
             };
             reader.readAsDataURL(file);
-            // Xóa URL input nếu đã chọn file
             const urlInput = document.getElementById('images');
             if (urlInput) {
                 urlInput.value = '';

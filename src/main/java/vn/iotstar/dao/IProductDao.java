@@ -1,0 +1,18 @@
+package vn.iotstar.dao;
+
+import java.util.List;
+import vn.iotstar.entity.Product;
+
+public interface IProductDao {
+    void insert(Product product);
+    void update(Product product);
+    void delete(int productId) throws Exception;
+    Product findById(int productId);
+    List<Product> findAll();
+    List<Product> findAll(int page, int pageSize);
+    List<Product> findTop10Recent();
+    List<Product> findByCategoryId(int categoryId, int page, int pageSize);
+    List<Product> searchByName(String keyword);
+    int count();
+    int countByCategoryId(int categoryId);
+}

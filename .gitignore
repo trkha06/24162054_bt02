@@ -13,5 +13,6 @@ target/
 *.iws
 
 *.log
+src/main/resources/mail.properties
 scratch/
 24162054_bt02/
