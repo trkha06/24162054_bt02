@@ -2,24 +2,26 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="vi">
-<jsp:include page="../common/header.jsp">
-    <jsp:param name="title" value="Bảng Điều Khiển Quản Lý" />
-</jsp:include>
+<head>
+    <meta charset="UTF-8">
+    <title>Bảng Điều Khiển Quản Lý - Manager Portal | shopbanhangcuakha</title>
+</head>
 <body>
-<jsp:include page="../common/topbar.jsp" />
-
-<div class="container my-5">
-    <div class="card card-custom p-4 shadow-sm text-center">
-        <h2 class="text-warning fw-bold"><i class="fa fa-tasks"></i> Chào mừng bạn đến với Trang Quản Lý (Manager)!</h2>
-        <p class="lead text-muted">Xin chào Manager <b>${sessionScope.account.fullName}</b> (@${sessionScope.account.userName})</p>
-        <div class="mt-4 d-flex justify-content-center gap-2">
-            <a href="${pageContext.request.contextPath}/profile" class="btn btn-primary px-4"><i class="fa fa-user-edit"></i> Hồ Sơ Cá Nhân</a>
-            <a href="${pageContext.request.contextPath}/logout" class="btn btn-danger px-4"><i class="fa fa-sign-out-alt"></i> Đăng Xuất</a>
+    <div class="card card-custom p-5 shadow-sm text-center my-4">
+        <div class="bg-warning text-dark rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 70px; height: 70px;">
+            <i class="fa fa-tasks fa-2x"></i>
+        </div>
+        <h2 class="text-dark fw-bold mb-2">Trang Quản Lý (Manager Dashboard)</h2>
+        <p class="lead text-muted">Xin chào Quản lý <b>${sessionScope.account.fullName}</b> (@${sessionScope.account.userName})</p>
+        <p class="text-secondary small">Khu vực dành cho nhân sự quản lý sản phẩm và danh mục cửa hàng.</p>
+        <div class="mt-4 d-flex justify-content-center gap-3">
+            <a href="${pageContext.request.contextPath}/product" class="btn btn-outline-primary px-4 fw-semibold">
+                <i class="fa fa-boxes-stacked me-1"></i> Xem Sản Phẩm
+            </a>
+            <a href="${pageContext.request.contextPath}/profile" class="btn btn-primary px-4 fw-semibold">
+                <i class="fa fa-user-edit me-1"></i> Hồ Sơ Cá Nhân
+            </a>
         </div>
     </div>
-</div>
-
-<jsp:include page="../common/footer.jsp" />
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

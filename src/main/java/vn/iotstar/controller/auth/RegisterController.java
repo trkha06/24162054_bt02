@@ -46,9 +46,26 @@ public class RegisterController extends HttpServlet {
         fullname = fullname == null ? "" : fullname.trim();
         phone = phone == null ? "" : phone.trim();
 
+        req.setAttribute("username", username);
+        req.setAttribute("fullname", fullname);
+        req.setAttribute("email", email);
+        req.setAttribute("phone", phone);
+
         if (username.isEmpty() || password == null || password.isBlank()
                 || email.isEmpty() || fullname.isEmpty() || phone.isEmpty()) {
-            req.setAttribute("alert", "Vui lòng nhập đầy đủ thông tin đăng ký.");
+            req.setAttribute("alert", "Vui lòng nhập đầy đủ tất cả các trường thông tin đăng ký.");
+            req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
+            return;
+        }
+
+        if (!username.matches("^[a-zA-Z0-9_]{3,30}$")) {
+            req.setAttribute("alert", "Tên tài khoản chỉ được chứa chữ cái, số, dấu gạch dưới và có độ dài từ 3 đến 30 ký tự.");
+            req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
+            return;
+        }
+
+        if (fullname.length() > 150) {
+            req.setAttribute("alert", "Họ và tên tối đa 150 ký tự.");
             req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
             return;
         }
@@ -59,20 +76,32 @@ public class RegisterController extends HttpServlet {
             return;
         }
 
+        if (!phone.matches("^(0[0-9]{9}|\\+84[0-9]{9})$")) {
+            req.setAttribute("alert", "Số điện thoại không đúng định dạng Việt Nam (10 chữ số, vd: 0901234567).");
+            req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
+            return;
+        }
+
+        if (password.length() < 6 || password.length() > 150) {
+            req.setAttribute("alert", "Mật khẩu phải có độ dài từ 6 đến 150 ký tự.");
+            req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
+            return;
+        }
+
         if (service.checkExistEmail(email)) {
-            req.setAttribute("alert", "Email đã tồn tại trong hệ thống!");
+            req.setAttribute("alert", "Email đã tồn tại trong hệ thống! Vui lòng sử dụng email khác.");
             req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
             return;
         }
 
         if (service.checkExistUsername(username)) {
-            req.setAttribute("alert", "Tài khoản (username) đã tồn tại!");
+            req.setAttribute("alert", "Tài khoản (username) đã tồn tại! Vui lòng chọn tên đăng nhập khác.");
             req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
             return;
         }
 
         if (service.checkExistPhone(phone)) {
-            req.setAttribute("alert", "Số điện thoại đã tồn tại!");
+            req.setAttribute("alert", "Số điện thoại đã tồn tại trong hệ thống! Vui lòng sử dụng số điện thoại khác.");
             req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
             return;
         }
@@ -84,7 +113,7 @@ public class RegisterController extends HttpServlet {
         OtpModel otpModel = new OtpModel(email, otp, expireTime, "REGISTER", pendingUser);
         HttpSession session = req.getSession(true);
         if (!EmailUtil.sendOtpEmail(email, otp, "Mã OTP kích hoạt tài khoản đăng ký")) {
-            req.setAttribute("alert", "Không thể gửi mã OTP. Vui lòng kiểm tra cấu hình email của hệ thống và thử lại.");
+            req.setAttribute("alert", "Không thể gửi mã OTP qua email. Vui lòng kiểm tra lại địa chỉ email hoặc cấu hình email của hệ thống.");
             req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);
             return;
         }

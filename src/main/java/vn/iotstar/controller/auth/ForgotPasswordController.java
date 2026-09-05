@@ -56,6 +56,7 @@ public class ForgotPasswordController extends HttpServlet {
     private void handleForgotPassword(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String accountInput = req.getParameter("account");
+        req.setAttribute("account", accountInput != null ? accountInput.trim() : "");
         if (accountInput == null || accountInput.trim().isEmpty()) {
             req.setAttribute("alert", "Vui lòng nhập tên tài khoản hoặc email.");
             req.getRequestDispatcher(Constant.Path.FORGOT_PASSWORD).forward(req, resp);
@@ -63,6 +64,11 @@ public class ForgotPasswordController extends HttpServlet {
         }
 
         accountInput = accountInput.trim();
+        if (accountInput.length() > 150) {
+            req.setAttribute("alert", "Tài khoản hoặc email không hợp lệ.");
+            req.getRequestDispatcher(Constant.Path.FORGOT_PASSWORD).forward(req, resp);
+            return;
+        }
         User user = userService.get(accountInput);
         if (user == null) {
             user = userService.findByEmail(accountInput);
@@ -124,7 +130,7 @@ public class ForgotPasswordController extends HttpServlet {
             return;
         }
 
-        if (inputOtp == null || !inputOtp.equals(otpModel.getOtp())) {
+        if (inputOtp == null || !inputOtp.matches("\\d{6}") || !inputOtp.equals(otpModel.getOtp())) {
             req.setAttribute("alert", "Mã OTP không chính xác. Vui lòng kiểm tra lại mã đã nhận.");
             req.getRequestDispatcher(Constant.Path.RESET_PASSWORD).forward(req, resp);
             return;
@@ -132,6 +138,12 @@ public class ForgotPasswordController extends HttpServlet {
 
         if (newPassword == null || newPassword.isBlank() || confirmPassword == null || confirmPassword.isBlank()) {
             req.setAttribute("alert", "Vui lòng nhập đầy đủ mật khẩu mới.");
+            req.getRequestDispatcher(Constant.Path.RESET_PASSWORD).forward(req, resp);
+            return;
+        }
+
+        if (newPassword.length() < 6 || newPassword.length() > 150) {
+            req.setAttribute("alert", "Mật khẩu mới phải có độ dài từ 6 đến 150 ký tự.");
             req.getRequestDispatcher(Constant.Path.RESET_PASSWORD).forward(req, resp);
             return;
         }

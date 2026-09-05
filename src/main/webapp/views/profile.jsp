@@ -3,32 +3,18 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
-<jsp:include page="common/header.jsp">
-    <jsp:param name="title" value="Hồ Sơ Cá Nhân - User Profile" />
-</jsp:include>
+<head>
+    <meta charset="UTF-8">
+    <title>Hồ Sơ Cá Nhân - shopbanhangcuakha</title>
+</head>
 <body>
-<jsp:include page="common/topbar.jsp" />
-
-<div class="container my-5">
+<div class="container my-3">
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb bg-white p-3 rounded-3 shadow-sm">
-            <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/home"><i class="fa fa-home"></i> Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/home"><i class="fa fa-home me-1"></i> Trang chủ</a></li>
             <li class="breadcrumb-item active" aria-current="page">Hồ sơ cá nhân</li>
         </ol>
     </nav>
-
-    <c:if test="${not empty alert}">
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
-            <i class="fa fa-exclamation-triangle me-2"></i> ${alert}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    </c:if>
-    <c:if test="${not empty success}">
-        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-            <i class="fa fa-check-circle me-2"></i> ${success}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    </c:if>
 
     <div class="row g-4">
         <div class="col-lg-4">
@@ -83,6 +69,10 @@
                         <span class="text-muted"><i class="fa fa-phone me-2 text-primary"></i> Điện thoại:</span>
                         <span class="fw-semibold">${not empty user.phone ? user.phone : '<em class=\"text-muted\">Chưa cập nhật</em>'}</span>
                     </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted"><i class="fa fa-envelope me-2 text-primary"></i> Email:</span>
+                        <span class="fw-semibold text-truncate" style="max-width: 170px;" title="${user.email}">${user.email}</span>
+                    </div>
                     <div class="d-flex justify-content-between py-2">
                         <span class="text-muted"><i class="fa fa-calendar-alt me-2 text-primary"></i> Ngày tạo:</span>
                         <span class="fw-semibold">${not empty user.createdDate ? user.createdDate : 'N/A'}</span>
@@ -91,11 +81,11 @@
 
                 <div class="mt-4 d-grid gap-2">
                     <c:if test="${user.roleid == 1}">
-                        <a href="${pageContext.request.contextPath}/admin/categories" class="btn btn-outline-danger btn-sm">
-                            <i class="fa fa-cogs me-1"></i> Quản lý Category
+                        <a href="${pageContext.request.contextPath}/admin/home" class="btn btn-outline-danger btn-sm fw-semibold">
+                            <i class="fa fa-cogs me-1"></i> Trang Quản Trị Admin
                         </a>
                     </c:if>
-                    <a href="${pageContext.request.contextPath}/home" class="btn btn-outline-primary btn-sm">
+                    <a href="${pageContext.request.contextPath}/home" class="btn btn-outline-primary btn-sm fw-semibold">
                         <i class="fa fa-home me-1"></i> Về Trang Chủ
                     </a>
                 </div>
@@ -112,19 +102,25 @@
                     <span class="badge bg-light text-secondary border p-2">JPA + Servlet 6.0</span>
                 </div>
 
-                <form action="${pageContext.request.contextPath}/profile" method="post" enctype="multipart/form-data" novalidate>
+                <form action="${pageContext.request.contextPath}/profile" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold text-secondary"><i class="fa fa-user me-1"></i> Tên đăng nhập (Username)</label>
                             <input type="text" class="form-control bg-light" value="${user.userName}" readonly disabled>
                             <small class="text-muted">Tên đăng nhập không thể thay đổi.</small>
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary"><i class="fa fa-envelope me-1"></i> Địa chỉ Email</label>
+                            <input type="text" class="form-control bg-light" value="${user.email}" readonly disabled>
+                            <small class="text-muted">Email dùng để xác thực bảo mật.</small>
+                        </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="fullname" class="form-label fw-bold"><i class="fa fa-id-card me-1 text-primary"></i> Họ và Tên <span class="text-danger">*</span></label>
                         <input type="text" id="fullname" name="fullname" class="form-control form-control-lg"
-                               value="${user.fullName}" placeholder="Nhập họ và tên đầy đủ" required>
+                               value="${user.fullName}" placeholder="Nhập họ và tên đầy đủ" maxlength="150" required>
+                        <div class="invalid-feedback">Họ và tên không được để trống.</div>
                     </div>
 
                     <div class="mb-3">
@@ -132,9 +128,9 @@
                         <div class="input-group">
                             <span class="input-group-text"><i class="fa fa-phone"></i></span>
                             <input type="tel" id="phone" name="phone" class="form-control"
-                                   value="${user.phone}" placeholder="Ví dụ: 0901234567" pattern="^(0|\+84)[0-9]{9,10}$">
+                                   value="${user.phone}" placeholder="Ví dụ: 0901234567" pattern="^(0[0-9]{9}|\+84[0-9]{9})$">
+                            <div class="invalid-feedback">Số điện thoại phải có 10 chữ số hợp lệ (bắt đầu bằng 0 hoặc +84).</div>
                         </div>
-                        <small class="text-muted">Định dạng số điện thoại Việt Nam 10 chữ số.</small>
                     </div>
 
                     <div class="card bg-light border-0 p-3 mb-4 rounded-3">
@@ -171,8 +167,6 @@
     </div>
 </div>
 
-<jsp:include page="common/footer.jsp" />
-
 <script>
     function previewFile(input) {
         if (input.files && input.files[0]) {
@@ -200,7 +194,20 @@
             }
         }
     }
+
+    (() => {
+        'use strict'
+        const forms = document.querySelectorAll('.needs-validation')
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
 </script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -58,7 +58,7 @@ public class VerifyOtpController extends HttpServlet {
             return;
         }
 
-        if (inputOtp == null || !inputOtp.equals(otpModel.getOtp())) {
+        if (inputOtp == null || !inputOtp.matches("\\d{6}") || !inputOtp.equals(otpModel.getOtp())) {
             req.setAttribute("alert", "Mã OTP không chính xác. Vui lòng kiểm tra lại mã đã nhận.");
             req.getRequestDispatcher(Constant.Path.VERIFY_OTP).forward(req, resp);
             return;

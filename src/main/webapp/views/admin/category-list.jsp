@@ -2,34 +2,27 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="vi">
-<jsp:include page="../common/header.jsp">
-    <jsp:param name="title" value="Quản lý danh mục bằng JPA" />
-</jsp:include>
+<head>
+    <meta charset="UTF-8">
+    <title>Quản Lý Category - Admin Portal | shopbanhangcuakha</title>
+</head>
 <body>
-<jsp:include page="../common/topbar.jsp" />
-
-<main class="container py-4">
     <div class="card card-custom p-4">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <div>
-                <h2 class="h3 fw-bold text-primary mb-1"><i class="fa fa-folder-tree"></i> Quản lý Category</h2>
-                <div class="text-muted">CRUD theo mô hình MVC 3 tầng, lưu dữ liệu bằng JPA/Hibernate.</div>
+                <h2 class="h3 fw-bold text-dark mb-1"><i class="fa fa-folder-tree text-warning me-2"></i> Quản Lý Danh Mục Category</h2>
+                <div class="text-muted small">CRUD theo mô hình MVC 3 tầng, ánh xạ dữ liệu bằng JPA/Hibernate</div>
             </div>
-            <a class="btn btn-success" href="<c:url value='/admin/category/add'/>">
-                <i class="fa fa-plus"></i> Thêm danh mục
+            <a class="btn btn-success fw-bold shadow-sm" href="<c:url value='/admin/category/add'/>">
+                <i class="fa fa-plus me-1"></i> Thêm Danh Mục Mới
             </a>
         </div>
 
-        <c:if test="${not empty success}"><div class="alert alert-success">${success}</div></c:if>
-        <c:if test="${not empty alert}"><div class="alert alert-danger">${alert}</div></c:if>
-
-        <form action="<c:url value='/admin/categories'/>" method="get" class="row g-2 mb-3">
+        <form action="<c:url value='/admin/categories'/>" method="get" class="row g-2 mb-4">
             <div class="col-md-7 col-lg-5">
-                <label for="q" class="visually-hidden">Tên danh mục</label>
                 <div class="input-group">
-                    <input id="q" name="q" class="form-control" value="${keyword}"
-                           placeholder="Tìm theo tên danh mục..." maxlength="100">
-                    <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i> Tìm</button>
+                    <input name="q" class="form-control" value="${keyword}" placeholder="Tìm kiếm theo tên danh mục..." maxlength="100">
+                    <button class="btn btn-primary" type="submit"><i class="fa fa-search me-1"></i> Tìm</button>
                     <c:if test="${not empty keyword}">
                         <a class="btn btn-outline-secondary" href="<c:url value='/admin/categories'/>">Xóa lọc</a>
                     </c:if>
@@ -42,10 +35,10 @@
                 <thead class="table-dark text-center">
                 <tr>
                     <th style="width: 70px">STT</th>
-                    <th style="width: 190px">Hình ảnh</th>
+                    <th style="width: 160px">Hình ảnh</th>
                     <th>Tên danh mục</th>
-                    <th style="width: 120px">Trạng thái</th>
-                    <th style="width: 170px">Thao tác</th>
+                    <th style="width: 140px">Trạng thái</th>
+                    <th style="width: 180px">Thao tác</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -59,37 +52,37 @@
                         </c:otherwise>
                     </c:choose>
                     <tr>
-                        <td class="text-center">${(currentPage - 1) * pageSize + stt.index + 1}</td>
+                        <td class="text-center fw-semibold">${(currentPage - 1) * pageSize + stt.index + 1}</td>
                         <td class="text-center">
-                            <img src="${imgUrl}" alt="Ảnh ${cate.categoryname}" width="150" height="100"
-                                 class="rounded border object-fit-cover"
+                            <img src="${imgUrl}" alt="Ảnh ${cate.categoryname}" width="120" height="80"
+                                 class="rounded border object-fit-cover shadow-sm"
                                  onerror="this.onerror=null;this.src='${pageContext.request.contextPath}/assets/img/category-placeholder.svg';">
                         </td>
-                        <td class="fw-semibold">${cate.categoryname}</td>
+                        <td class="fw-bold text-dark">${cate.categoryname}</td>
                         <td class="text-center">
                             <c:choose>
-                                <c:when test="${cate.status == 1}"><span class="badge bg-success">Hoạt động</span></c:when>
-                                <c:otherwise><span class="badge bg-secondary">Đã khóa</span></c:otherwise>
+                                <c:when test="${cate.status == 1}"><span class="badge bg-success px-3 py-2">Hoạt động</span></c:when>
+                                <c:otherwise><span class="badge bg-secondary px-3 py-2">Đã khóa</span></c:otherwise>
                             </c:choose>
                         </td>
                         <td class="text-center text-nowrap">
                             <c:url value="/admin/category/edit" var="editUrl"><c:param name="id" value="${cate.categoryid}" /></c:url>
                             <c:url value="/admin/category/delete" var="deleteUrl"><c:param name="id" value="${cate.categoryid}" /></c:url>
-                            <a class="btn btn-warning btn-sm" href="${editUrl}"><i class="fa fa-pen"></i> Sửa</a>
-                            <a class="btn btn-danger btn-sm" href="${deleteUrl}"
-                               onclick="return confirm('Bạn chắc chắn muốn xóa danh mục này?');"><i class="fa fa-trash"></i> Xóa</a>
+                            <a class="btn btn-warning btn-sm fw-semibold me-1" href="${editUrl}"><i class="fa fa-pen me-1"></i> Sửa</a>
+                            <a class="btn btn-danger btn-sm fw-semibold" href="${deleteUrl}"
+                               onclick="return confirm('Bạn có chắc chắn muốn xóa danh mục &quot;${cate.categoryname}&quot;?');"><i class="fa fa-trash me-1"></i> Xóa</a>
                         </td>
                     </tr>
                 </c:forEach>
                 <c:if test="${empty listcate}">
-                    <tr><td colspan="5" class="text-center text-muted py-5">Không tìm thấy danh mục phù hợp.</td></tr>
+                    <tr><td colspan="5" class="text-center text-muted py-5">Không tìm thấy danh mục nào phù hợp.</td></tr>
                 </c:if>
                 </tbody>
             </table>
         </div>
 
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <span class="text-muted">Tổng số: ${totalItems} danh mục</span>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-3 border-top">
+            <span class="text-muted">Tổng số: <b>${totalItems}</b> danh mục</span>
             <c:if test="${totalPages > 1}">
                 <nav aria-label="Phân trang danh mục">
                     <ul class="pagination mb-0">
@@ -104,8 +97,5 @@
             </c:if>
         </div>
     </div>
-</main>
-<jsp:include page="../common/footer.jsp" />
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

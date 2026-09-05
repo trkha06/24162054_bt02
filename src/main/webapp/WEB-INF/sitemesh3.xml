@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemesh>
-    <mapping path="/admin/*" decorator="/views/decorators/admin.jsp"/>
-    <mapping path="/admin" decorator="/views/decorators/admin.jsp"/>
-    <mapping path="/*" decorator="/views/decorators/web.jsp"/>
-    
-    <content-processor>
-        <tag-rule-bundle class="org.sitemesh.content.tagrules.html.CoreHtmlTagRuleBundle"/>
-    </content-processor>
+    <mapping path="/decorators/*" exclude="true"/>
+    <mapping path="/WEB-INF/decorators/*" exclude="true"/>
+    <mapping path="/views/decorators/*" exclude="true"/>
+    <mapping path="/views/loi404.jsp" exclude="true"/>
+    <mapping path="/views/loi500.jsp" exclude="true"/>
+    <mapping path="/assets/*" exclude="true"/>
+    <mapping path="/image*" exclude="true"/>
+    <mapping path="/image/*" exclude="true"/>
+    <mapping path="/api/*" exclude="true"/>
+    <mapping path="/uploadFile*" exclude="true"/>
+    <mapping path="/multiPartServlet*" exclude="true"/>
+
+    <mapping path="/admin/*" decorator="admin.jsp"/>
+    <mapping path="/admin" decorator="admin.jsp"/>
+    <mapping path="/*" decorator="web.jsp"/>
 </sitemesh>

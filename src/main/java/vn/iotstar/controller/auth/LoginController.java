@@ -64,13 +64,21 @@ public class LoginController extends HttpServlet {
         String remember = req.getParameter("remember");
         boolean isRememberMe = "on".equals(remember);
 
-        if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+        username = username == null ? "" : username.trim();
+        req.setAttribute("username", username);
+        if (username.isEmpty() || password == null || password.isBlank()) {
             req.setAttribute("alert", "Tài khoản hoặc mật khẩu không được rỗng");
             req.getRequestDispatcher(Constant.Path.LOGIN).forward(req, resp);
             return;
         }
 
-        User user = userService.login(username.trim(), password);
+        if (username.length() > 100 || password.length() > 150) {
+            req.setAttribute("alert", "Thông tin đăng nhập không hợp lệ.");
+            req.getRequestDispatcher(Constant.Path.LOGIN).forward(req, resp);
+            return;
+        }
+
+        User user = userService.login(username, password);
         if (user != null) {
             HttpSession session = req.getSession(true);
             session.setAttribute(Constant.SESSION_ACCOUNT, user);

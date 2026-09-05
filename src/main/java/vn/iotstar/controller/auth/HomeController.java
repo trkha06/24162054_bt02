@@ -16,7 +16,7 @@ import vn.iotstar.services.impl.ProductServiceImpl;
 import vn.iotstar.util.Constant;
 
 @SuppressWarnings("serial")
-@WebServlet(urlPatterns = {"/home", "/"})
+@WebServlet(urlPatterns = {"/home"})
 public class HomeController extends HttpServlet {
     private final IProductService productService = new ProductServiceImpl();
     private final ICategoryService categoryService = new CategoryServiceImpl();

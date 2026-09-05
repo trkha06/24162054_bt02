@@ -129,23 +129,10 @@ public class AdminProductController extends HttpServlet {
     private void insert(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         Product product = new Product();
-        product.setProductName(value(request.getParameter("productname")));
-        product.setPrice(parseDouble(request.getParameter("price"), 0.0));
-        product.setQuantity(parsePositiveInt(request.getParameter("quantity"), 0));
-        product.setDescription(value(request.getParameter("description")));
-        product.setStatus("1".equals(request.getParameter("status")) ? 1 : 0);
         product.setCreateDate(new Date());
 
-        int categoryId = parsePositiveInt(request.getParameter("categoryid"), 0);
-        if (categoryId > 0) {
-            Category category = categoryService.findById(categoryId);
-            product.setCategory(category);
-        }
-
         try {
-            if (product.getProductName().isEmpty()) {
-                throw new IllegalArgumentException("Tên sản phẩm không được để trống.");
-            }
+            populateProduct(request, product);
             product.setImages(resolveImage(request, Constant.DEFAULT_IMAGE));
             productService.insert(product);
             flash(request, "success", "Đã thêm sản phẩm mới thành công.");
@@ -168,24 +155,8 @@ public class AdminProductController extends HttpServlet {
             return;
         }
 
-        product.setProductName(value(request.getParameter("productname")));
-        product.setPrice(parseDouble(request.getParameter("price"), 0.0));
-        product.setQuantity(parsePositiveInt(request.getParameter("quantity"), 0));
-        product.setDescription(value(request.getParameter("description")));
-        product.setStatus("1".equals(request.getParameter("status")) ? 1 : 0);
-
-        int categoryId = parsePositiveInt(request.getParameter("categoryid"), 0);
-        if (categoryId > 0) {
-            Category category = categoryService.findById(categoryId);
-            product.setCategory(category);
-        } else {
-            product.setCategory(null);
-        }
-
         try {
-            if (product.getProductName().isEmpty()) {
-                throw new IllegalArgumentException("Tên sản phẩm không được để trống.");
-            }
+            populateProduct(request, product);
             product.setImages(resolveImage(request, product.getImages()));
             productService.update(product);
             flash(request, "success", "Đã cập nhật sản phẩm thành công.");
@@ -247,18 +218,75 @@ public class AdminProductController extends HttpServlet {
         return currentImage == null || currentImage.isBlank() ? Constant.DEFAULT_IMAGE : currentImage;
     }
 
+    private void populateProduct(HttpServletRequest request, Product product) {
+        String name = value(request.getParameter("productname"));
+        if (name.length() < 2 || name.length() > 200) {
+            throw new IllegalArgumentException("Tên sản phẩm phải có độ dài từ 2 đến 200 ký tự.");
+        }
+
+        int categoryId = parseRequiredPositiveInt(request.getParameter("categoryid"), "Danh mục");
+        Category category = categoryService.findById(categoryId);
+        if (category == null) {
+            throw new IllegalArgumentException("Danh mục đã chọn không tồn tại.");
+        }
+
+        double price = parseRequiredNonNegativeDouble(request.getParameter("price"), "Đơn giá");
+        int quantity = parseRequiredNonNegativeInt(request.getParameter("quantity"), "Số lượng");
+        String description = value(request.getParameter("description"));
+        if (description.length() > 2000) {
+            throw new IllegalArgumentException("Mô tả sản phẩm không được quá 2.000 ký tự.");
+        }
+
+        String status = request.getParameter("status");
+        if (!"0".equals(status) && !"1".equals(status)) {
+            throw new IllegalArgumentException("Vui lòng chọn trạng thái bán hàng hợp lệ.");
+        }
+
+        product.setProductName(name);
+        product.setCategory(category);
+        product.setPrice(price);
+        product.setQuantity(quantity);
+        product.setDescription(description);
+        product.setStatus(Integer.parseInt(status));
+    }
+
+    private int parseRequiredPositiveInt(String rawValue, String fieldName) {
+        int parsed = parseRequiredNonNegativeInt(rawValue, fieldName);
+        if (parsed < 1) {
+            throw new IllegalArgumentException(fieldName + " phải là một giá trị hợp lệ.");
+        }
+        return parsed;
+    }
+
+    private int parseRequiredNonNegativeInt(String rawValue, String fieldName) {
+        String raw = value(rawValue);
+        if (!raw.matches("\\d+")) {
+            throw new IllegalArgumentException(fieldName + " phải là số nguyên không âm.");
+        }
+        try {
+            return Integer.parseInt(raw);
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException(fieldName + " vượt quá giá trị cho phép.");
+        }
+    }
+
+    private double parseRequiredNonNegativeDouble(String rawValue, String fieldName) {
+        String raw = value(rawValue);
+        try {
+            double parsed = Double.parseDouble(raw);
+            if (!Double.isFinite(parsed) || parsed < 0) {
+                throw new IllegalArgumentException(fieldName + " phải là số không âm.");
+            }
+            return parsed;
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException(fieldName + " phải là số không âm.");
+        }
+    }
+
     private int parsePositiveInt(String value, int fallback) {
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException exception) {
-            return fallback;
-        }
-    }
-
-    private double parseDouble(String value, double fallback) {
-        try {
-            return Double.parseDouble(value);
-        } catch (Exception exception) {
             return fallback;
         }
     }

@@ -119,10 +119,8 @@ public class CategoryController extends HttpServlet {
     private void insert(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         Category category = new Category();
-        category.setCategoryname(value(request.getParameter("categoryname")));
-        category.setStatus("1".equals(request.getParameter("status")) ? 1 : 0);
-
         try {
+            populateCategory(request, category);
             category.setImages(resolveImage(request, Constant.DEFAULT_IMAGE));
             categoryService.insert(category);
             flash(request, "success", "Đã thêm danh mục thành công.");
@@ -144,9 +142,8 @@ public class CategoryController extends HttpServlet {
             return;
         }
 
-        category.setCategoryname(value(request.getParameter("categoryname")));
-        category.setStatus("1".equals(request.getParameter("status")) ? 1 : 0);
         try {
+            populateCategory(request, category);
             category.setImages(resolveImage(request, category.getImages()));
             categoryService.update(category);
             flash(request, "success", "Đã cập nhật danh mục thành công.");
@@ -210,6 +207,21 @@ public class CategoryController extends HttpServlet {
             return imageUrl;
         }
         return currentImage == null || currentImage.isBlank() ? Constant.DEFAULT_IMAGE : currentImage;
+    }
+
+    private void populateCategory(HttpServletRequest request, Category category) {
+        String name = value(request.getParameter("categoryname"));
+        if (name.isEmpty() || name.length() > 100) {
+            throw new IllegalArgumentException("Tên danh mục là bắt buộc và không được quá 100 ký tự.");
+        }
+
+        String status = request.getParameter("status");
+        if (!"0".equals(status) && !"1".equals(status)) {
+            throw new IllegalArgumentException("Vui lòng chọn trạng thái hợp lệ cho danh mục.");
+        }
+
+        category.setCategoryname(name);
+        category.setStatus(Integer.parseInt(status));
     }
 
     private int parsePositiveInt(String value, int fallback) {

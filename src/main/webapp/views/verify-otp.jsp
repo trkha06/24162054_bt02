@@ -2,64 +2,74 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="vi">
-<jsp:include page="common/header.jsp">
-    <jsp:param name="title" value="Kích Hoạt Tài Khoản - Xác Nhận OTP" />
-</jsp:include>
+<head>
+    <meta charset="UTF-8">
+    <title>Xác Thực Mã OTP - shopbanhangcuakha</title>
+</head>
 <body>
-<jsp:include page="common/topbar.jsp" />
+<div class="row justify-content-center my-4">
+    <div class="col-md-6 col-lg-5">
+        <div class="card card-custom p-4 p-md-5">
+            <div class="text-center mb-4">
+                <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <i class="fa fa-envelope-circle-check fa-lg"></i>
+                </div>
+                <h3 class="fw-bold text-success">XÁC THỰC MÃ OTP</h3>
+                <p class="text-muted small">Mã xác thực 6 chữ số đã được gửi đến email của bạn (hiệu lực trong 5 phút)</p>
+            </div>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card card-custom p-4">
-                <div class="text-center mb-4">
-                    <div class="display-6 text-success mb-2"><i class="fa fa-envelope-circle-check"></i></div>
-                    <h3 class="fw-bold text-success">XÁC THỰC MÃ OTP</h3>
-                    <p class="text-muted">Mã xác thực 6 chữ số đã được gửi đến địa chỉ đã đăng ký.</p>
+            <c:if test="${sessionScope.otpResentMessage != null}">
+                <div class="alert alert-info alert-dismissible fade show shadow-sm border-0 small" role="alert">
+                    <i class="fa fa-info-circle me-1"></i> ${sessionScope.otpResentMessage}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <c:remove var="otpResentMessage" scope="session"/>
+            </c:if>
+
+            <form action="${pageContext.request.contextPath}/verify-otp" method="post" class="needs-validation" novalidate>
+                <div class="mb-4 text-center">
+                    <label class="form-label fw-semibold">Nhập mã OTP (6 chữ số) <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control form-control-lg text-center fw-bold text-success" name="otp"
+                           placeholder="------" maxlength="6" pattern="[0-9]{6}" required autofocus
+                           style="letter-spacing: 10px; font-size: 26px; border-width: 2px;" />
+                    <div class="invalid-feedback text-center">Vui lòng nhập chính xác 6 chữ số mã OTP.</div>
                 </div>
 
-                <c:if test="${alert != null}">
-                    <div class="alert alert-danger" role="alert">
-                        <i class="fa fa-exclamation-triangle"></i> ${alert}
-                    </div>
-                </c:if>
+                <button type="submit" class="btn btn-success w-100 py-2 fw-bold shadow-sm mb-3">
+                    <i class="fa fa-check-circle me-1"></i> Xác Nhận Kích Hoạt
+                </button>
 
-                <c:if test="${sessionScope.otpResentMessage != null}">
-                    <div class="alert alert-info" role="alert">
-                        <i class="fa fa-info-circle"></i> ${sessionScope.otpResentMessage}
-                    </div>
-                    <c:remove var="otpResentMessage" scope="session"/>
-                </c:if>
+                <div class="text-center">
+                    <span class="text-muted small">Chưa nhận được mã? </span>
+                    <a href="${pageContext.request.contextPath}/resend-otp" class="fw-bold text-primary text-decoration-none small">
+                        <i class="fa fa-rotate-right me-1"></i> Gửi lại mã OTP mới
+                    </a>
+                </div>
 
-                <form action="${pageContext.request.contextPath}/verify-otp" method="post">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Nhập mã OTP (6 chữ số):</label>
-                        <input type="text" class="form-control form-control-lg text-center fw-bold" name="otp"
-                               placeholder="------" maxlength="6" pattern="[0-9]{6}" required autofocus
-                               style="letter-spacing: 8px; font-size: 24px;" />
-                    </div>
-
-                    <button type="submit" class="btn btn-success w-100 py-2 fw-bold mb-3">
-                        <i class="fa fa-check-circle"></i> Xác Nhận Kích Hoạt
-                    </button>
-
-                    <div class="text-center">
-                        <span class="text-muted">Không nhận được mã? </span>
-                        <a href="${pageContext.request.contextPath}/resend-otp" class="fw-bold text-primary text-decoration-none">
-                            <i class="fa fa-rotate-right"></i> Gửi lại mã OTP
-                        </a>
-                    </div>
-
-                    <div class="text-center mt-3 pt-3 border-top">
-                        <a href="${pageContext.request.contextPath}/register" class="text-secondary small text-decoration-none">
-                            <i class="fa fa-arrow-left"></i> Đăng ký lại tài khoản khác
-                        </a>
-                    </div>
-                </form>
-            </div>
+                <div class="text-center mt-4 pt-3 border-top">
+                    <a href="${pageContext.request.contextPath}/register" class="text-secondary small text-decoration-none">
+                        <i class="fa fa-arrow-left me-1"></i> Đăng ký lại tài khoản khác
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-<jsp:include page="common/footer.jsp" />
+
+<script>
+    (() => {
+        'use strict'
+        const forms = document.querySelectorAll('.needs-validation')
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
 </body>
 </html>

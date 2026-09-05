@@ -85,15 +85,15 @@ public class ProfileController extends HttpServlet {
         String fullname = value(request.getParameter("fullname"));
         String phone = value(request.getParameter("phone"));
 
-        if (fullname.isEmpty()) {
-            request.setAttribute("alert", "Họ và tên không được để trống.");
+        if (fullname.isEmpty() || fullname.length() > 150) {
+            request.setAttribute("alert", "Họ và tên là bắt buộc và không được quá 150 ký tự.");
             request.setAttribute("user", user);
             request.getRequestDispatcher(Constant.Path.PROFILE).forward(request, response);
             return;
         }
 
         if (!phone.isEmpty()) {
-            if (!phone.matches("^(0|\\+84)[0-9]{9,10}$")) {
+            if (!phone.matches("^(0[0-9]{9}|\\+84[0-9]{9})$")) {
                 request.setAttribute("alert", "Số điện thoại không đúng định dạng (ví dụ: 0901234567).");
                 request.setAttribute("user", user);
                 request.getRequestDispatcher(Constant.Path.PROFILE).forward(request, response);
@@ -167,7 +167,7 @@ public class ProfileController extends HttpServlet {
             imageUrl = value(request.getParameter("avatarUrl"));
         }
         if (!imageUrl.isEmpty()) {
-            if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
+            if (imageUrl.length() > 255 || (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://"))) {
                 throw new IllegalArgumentException("Đường dẫn ảnh phải bắt đầu bằng http:// hoặc https://.");
             }
             return imageUrl;

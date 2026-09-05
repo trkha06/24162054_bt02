@@ -2,68 +2,76 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="vi">
-<jsp:include page="common/header.jsp">
-    <jsp:param name="title" value="Đăng Nhập - Cửa Hàng Trực Tuyến" />
-</jsp:include>
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng Nhập - shopbanhangcuakha</title>
+</head>
 <body>
-<jsp:include page="common/topbar.jsp" />
+<div class="row justify-content-center my-4">
+    <div class="col-md-6 col-lg-5">
+        <div class="card card-custom p-4 p-md-5">
+            <div class="text-center mb-4">
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <i class="fa fa-lock fa-lg"></i>
+                </div>
+                <h3 class="fw-bold text-dark">ĐĂNG NHẬP</h3>
+                <p class="text-muted small">Hệ thống bài tập Servlet MVC 3-Tier & JPA</p>
+            </div>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card card-custom p-4">
-                <div class="text-center mb-4">
-                    <h3 class="fw-bold text-primary"><i class="fa fa-lock"></i> ĐĂNG NHẬP</h3>
-                    <p class="text-muted">Hệ thống bài tập Servlet MVC 3-Tier</p>
+            <form action="${pageContext.request.contextPath}/login" method="post" class="needs-validation" novalidate>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Tên tài khoản hoặc Email <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="fa fa-user text-secondary"></i></span>
+                        <input type="text" class="form-control" name="username" value="${not empty username ? username : param.username}" placeholder="Nhập username hoặc email..." maxlength="100" required autofocus />
+                        <div class="invalid-feedback">Vui lòng nhập tên tài khoản hoặc email.</div>
+                    </div>
                 </div>
 
-                <c:if test="${alert != null}">
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fa fa-exclamation-triangle"></i> ${alert}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Mật khẩu <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="fa fa-key text-secondary"></i></span>
+                        <input type="password" class="form-control" name="password" placeholder="Nhập mật khẩu..." maxlength="150" required />
+                        <div class="invalid-feedback">Vui lòng nhập mật khẩu.</div>
                     </div>
-                </c:if>
-                <c:if test="${success != null}">
-                    <div class="alert alert-success" role="alert">
-                        <i class="fa fa-check-circle"></i> ${success}
-                    </div>
-                </c:if>
+                </div>
 
-                <form action="${pageContext.request.contextPath}/login" method="post">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Tên tài khoản hoặc Email:</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa fa-user"></i></span>
-                            <input type="text" class="form-control" name="username" value="${param.username}" placeholder="Nhập username hoặc email..." required autofocus />
-                        </div>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="remember" id="rememberMe">
+                        <label class="form-check-label small" for="rememberMe">Ghi nhớ đăng nhập</label>
                     </div>
+                    <a href="${pageContext.request.contextPath}/forgot-password" class="text-decoration-none small text-primary fw-semibold">Quên mật khẩu?</a>
+                </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Mật khẩu:</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa fa-key"></i></span>
-                            <input type="password" class="form-control" name="password" placeholder="Nhập mật khẩu..." required />
-                        </div>
-                    </div>
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+                    <i class="fa fa-sign-in-alt me-1"></i> Đăng nhập
+                </button>
 
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="remember" id="rememberMe">
-                            <label class="form-check-label" for="rememberMe">Ghi nhớ đăng nhập</label>
-                        </div>
-                        <a href="${pageContext.request.contextPath}/forgot-password" class="text-decoration-none small text-primary fw-semibold">Quên mật khẩu?</a>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold"><i class="fa fa-sign-in-alt"></i> Đăng nhập</button>
-
-                    <div class="text-center mt-4">
-                        <p class="mb-0 text-muted">Chưa có tài khoản? <a href="${pageContext.request.contextPath}/register" class="fw-bold text-decoration-none">Đăng ký ngay</a></p>
-                        <p class="mt-2"><a href="${pageContext.request.contextPath}/home" class="text-secondary small"><i class="fa fa-home"></i> Quay lại trang chủ</a></p>
-                    </div>
-                </form>
-            </div>
+                <div class="text-center mt-4 pt-3 border-top">
+                    <p class="mb-0 text-muted small">Chưa có tài khoản? <a href="${pageContext.request.contextPath}/register" class="fw-bold text-primary text-decoration-none">Đăng ký ngay</a></p>
+                    <p class="mt-2 mb-0"><a href="${pageContext.request.contextPath}/home" class="text-secondary small text-decoration-none"><i class="fa fa-arrow-left me-1"></i> Quay lại trang chủ</a></p>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-<jsp:include page="common/footer.jsp" />
+
+<script>
+    (() => {
+        'use strict'
+        const forms = document.querySelectorAll('.needs-validation')
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
 </body>
 </html>

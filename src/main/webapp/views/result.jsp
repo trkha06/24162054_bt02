@@ -1,23 +1,26 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="vi">
-<jsp:include page="common/header.jsp">
-    <jsp:param name="title" value="Kết quả tải tệp" />
-</jsp:include>
+<head>
+    <meta charset="UTF-8">
+    <title>Kết Quả Tải Tệp - shopbanhangcuakha</title>
+</head>
 <body>
-<jsp:include page="common/topbar.jsp" />
-<main class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-7 col-lg-6">
-            <div class="card card-custom p-4 text-center">
-                <i class="fa fa-circle-check text-success display-5 mb-3"></i>
-                <h1 class="h4 fw-bold">Kết quả tải tệp</h1>
-                <p class="mb-4">${message}</p>
-                <a class="btn btn-primary" href="${pageContext.request.contextPath}/multiPartServlet">Tải tệp khác</a>
+<div class="row justify-content-center my-4">
+    <div class="col-md-7 col-lg-6">
+        <div class="card card-custom p-4 p-md-5 text-center shadow-sm">
+            <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 70px; height: 70px;">
+                <i class="fa fa-circle-check fa-2x"></i>
+            </div>
+            <h3 class="fw-bold text-dark mb-2">Tải Tệp Thành Công</h3>
+            <p class="text-muted mb-4">${message}</p>
+            <div class="d-flex justify-content-center gap-2">
+                <a class="btn btn-outline-secondary px-4" href="${pageContext.request.contextPath}/home">Về Trang Chủ</a>
+                <a class="btn btn-primary px-4" href="${pageContext.request.contextPath}/multiPartServlet">Tải Tệp Khác</a>
             </div>
         </div>
     </div>
-</main>
-<jsp:include page="common/footer.jsp" />
+</div>
 </body>
 </html>
